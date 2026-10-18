@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Utensils, Menu, X, User, LogOut, LayoutDashboard, Shield, ChefHat } from 'lucide-react';
 import { useAuthModal } from './AuthModalProvider';
+import { appConfig } from '@/lib/config';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { openLoginModal, currentUser, logout } = useAuthModal();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || 'TiffinGhar';
+  const brandName = appConfig.brandName;
 
   const navLinks = [
     { name: 'Home', href: '/' },

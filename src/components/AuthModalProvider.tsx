@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useRouter } from 'next/navigation';
 import { X, Lock, Mail, User, Phone, MapPin, Building, ArrowRight, CheckCircle2, ShieldCheck, ChefHat } from 'lucide-react';
 import { useToast } from './ToastProvider';
+import { appConfig } from '@/lib/config';
 
 interface UserSessionInfo {
   userId: number;
@@ -86,7 +87,7 @@ export default function AuthModalProvider({ children }: { children: React.ReactN
 
   // Auto popup after 15 seconds for unauthenticated visitors (unless dismissed in this session)
   useEffect(() => {
-    const delay = parseInt(process.env.NEXT_PUBLIC_LOGIN_POPUP_DELAY_SECONDS || '15', 10) * 1000;
+    const delay = (appConfig.loginPopupDelaySeconds || 15) * 1000;
     const dismissed = typeof window !== 'undefined' ? sessionStorage.getItem('tiffinghar_auth_dismissed') : null;
 
     if (dismissed || currentUser) return;
@@ -265,7 +266,7 @@ export default function AuthModalProvider({ children }: { children: React.ReactN
                 )}
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-[#1F2823] tracking-tight">
-                {authMode === 'LOGIN' && `Welcome to ${process.env.NEXT_PUBLIC_BRAND_NAME || 'TiffinGhar'}`}
+                {authMode === 'LOGIN' && `Welcome to ${appConfig.brandName}`}
                 {authMode === 'REGISTER' && `Create your ${activeRole === 'PARTNER' ? 'Partner' : 'Customer'} Account`}
                 {authMode === 'FORGOT' && 'Reset your Password'}
               </h2>
