@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Star,
@@ -35,6 +36,17 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+
+  // Prevent background scroll when lightbox is open
+  useEffect(() => {
+    if (lightboxImg) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [lightboxImg]);
 
   useEffect(() => {
     async function fetchDetail() {
@@ -267,7 +279,7 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* Content Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Main: Dishes & Menu */}
           <div className="lg:col-span-8 space-y-8">
             {/* About Kitchen */}
@@ -305,16 +317,14 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {partner.products?.map((prod: any) => (
-                  <div
+                  <Link
                     key={prod.id}
-                    className="rounded-3xl bg-white p-4 border border-neutral-200/80 shadow-xs flex flex-col justify-between"
+                    href={`/meals/${prod.id}`}
+                    className="rounded-3xl bg-white p-4 border border-neutral-200/80 shadow-xs flex flex-col justify-between hover:shadow-md hover:border-[#24422E]/30 transition-all cursor-pointer group"
                   >
                     <div>
                       {prod.cover_image && (
-                        <div
-                          onClick={() => setLightboxImg(prod.cover_image)}
-                          className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-neutral-100 mb-3 cursor-pointer group"
-                        >
+                        <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-neutral-100 mb-3">
                           <img
                             src={prod.cover_image}
                             alt={prod.name}
@@ -327,33 +337,50 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
                           >
                             {prod.is_veg ? 'Veg' : 'Non-Veg'}
                           </div>
+
+                          {prod.images && prod.images.length > 1 && (
+                            <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-md text-white text-[10px] font-bold">
+                              +{prod.images.length - 1} photos
+                            </div>
+                          )}
                         </div>
                       )}
 
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-bold text-base text-[#1F2823]">{prod.name}</h3>
+                        <h3 className="font-bold text-base text-[#1F2823] group-hover:text-[#24422E] transition-colors">
+                          {prod.name}
+                        </h3>
                         <span className="font-black text-sm text-[#24422E]">₹{prod.price}</span>
                       </div>
-                      <p className="text-xs text-[#5E6961] mt-1 leading-relaxed">
+                      <p className="text-xs text-[#5E6961] mt-1 leading-relaxed line-clamp-2">
                         {prod.description}
                       </p>
                     </div>
 
                     <div className="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between text-xs">
-                      <span className="text-neutral-400 font-medium">{prod.category}</span>
-                      <a
-                        href={`https://wa.me/${partner.contact_whatsapp?.replace(/[^0-9]/g, '')}?text=Hi%20${encodeURIComponent(
-                          partner.kitchen_name
-                        )},%20I%20would%20like%20to%20order%20the%20${encodeURIComponent(prod.name)}.`}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={() => handleContactClick('WHATSAPP')}
+                      <span className="text-[#24422E] font-bold group-hover:underline flex items-center gap-1">
+                        <span>View Details & Photos</span>
+                        <span>→</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleContactClick('WHATSAPP');
+                          if (typeof window !== 'undefined' && partner.contact_whatsapp) {
+                            const url = `https://wa.me/${partner.contact_whatsapp.replace(/[^0-9]/g, '')}?text=Hi%20${encodeURIComponent(
+                              partner.kitchen_name
+                            )},%20I%20would%20like%20to%20order%20the%20${encodeURIComponent(prod.name)}.`;
+                            window.open(url, '_blank');
+                          }
+                        }}
                         className="font-bold text-[#E4753F] hover:underline"
                       >
                         Order via WhatsApp →
-                      </a>
+                      </button>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -494,11 +521,77 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
 
-          {/* Right Column: Location & Delivery info */}
-          <div className="lg:col-span-4 space-y-6">
+          {/* Right Column: Sticky Sidebar with Order CTA, Location, and Trust Badges */}
+          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 self-start">
+            {/* Direct Order Card */}
             <div className="rounded-3xl bg-white p-6 border border-neutral-200/80 shadow-xs space-y-4">
-              <h2 className="text-lg font-bold text-[#1F2823]">
-                Location & Delivery
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Accepting Orders
+                  </span>
+                  <h3 className="text-lg font-black text-[#1F2823] mt-0.5">
+                    Order Directly
+                  </h3>
+                </div>
+                <div className="px-2.5 py-1 rounded-xl bg-amber-50 text-amber-900 font-bold text-xs flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                  <span>{partner.averageRating.toFixed(1)}</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-[#5E6961] leading-relaxed">
+                Connect directly with Chef {partner.owner_name || partner.kitchen_name} to start your daily subscription or order individual meals.
+              </p>
+
+              <div className="space-y-2.5 pt-1">
+                {partner.contact_whatsapp && (
+                  <a
+                    href={`https://wa.me/${partner.contact_whatsapp.replace(/[^0-9]/g, '')}?text=Hi%20${encodeURIComponent(
+                      partner.kitchen_name
+                    )},%20I%20saw%20your%20tiffin%20menu%20on%20TiffinGhar%20and%20would%20like%20to%20order.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => handleContactClick('WHATSAPP')}
+                    className="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>WhatsApp Order</span>
+                  </a>
+                )}
+
+                <a
+                  href={`tel:${partner.contact_phone}`}
+                  onClick={() => handleContactClick('CALL')}
+                  className="w-full py-3 rounded-2xl bg-[#24422E] hover:bg-[#1E3626] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm shadow-[#24422E]/15 transition-all"
+                >
+                  <Phone className="w-4 h-4" />
+                  <span>Call Kitchen ({partner.contact_phone})</span>
+                </a>
+              </div>
+
+              <div className="pt-3 border-t border-neutral-100 space-y-1.5 text-[11px] text-neutral-500">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>0% Middleman fee • Direct Chef pricing</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>100% Home Cooked fresh daily</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>Flexible pause & resume anytime</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Location & Delivery Schedule Card */}
+            <div className="rounded-3xl bg-white p-6 border border-neutral-200/80 shadow-xs space-y-4">
+              <h2 className="text-lg font-bold text-[#1F2823] flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#E4753F]" />
+                <span>Location & Delivery</span>
               </h2>
 
               <div className="space-y-3 text-xs text-neutral-600">
@@ -535,6 +628,17 @@ export default function PartnerDetailPage({ params }: { params: Promise<{ id: st
                 <span>Open in Google Maps</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
+            </div>
+
+            {/* Trust & Hygiene Guarantee */}
+            <div className="rounded-3xl bg-[#24422E]/5 border border-[#24422E]/15 p-5 space-y-2.5 text-xs">
+              <div className="flex items-center gap-2 text-[#24422E] font-bold">
+                <ShieldCheck className="w-4 h-4" />
+                <span>TiffinGhar Verified Standards</span>
+              </div>
+              <p className="text-[#5E6961] text-[11px] leading-relaxed">
+                All listed kitchens undergo onboarding verification, hygienic meal preparation checks, and maintain genuine customer ratings.
+              </p>
             </div>
           </div>
         </div>

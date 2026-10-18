@@ -28,9 +28,9 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] flex flex-col md:flex-row">
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-white border-r border-neutral-200/80 p-6 flex flex-col justify-between shrink-0">
+    <div className="min-h-[calc(100vh-5rem)] bg-[#FAF7F2] flex flex-col md:flex-row items-start relative">
+      {/* Desktop Sidebar - Sticky & Contained (Stops before Footer) */}
+      <aside className="hidden md:flex w-64 bg-white border-r border-neutral-200/80 p-6 flex-col justify-between shrink-0 sticky top-20 h-[calc(100vh-5rem)] self-start overflow-y-auto no-scrollbar z-20">
         <div>
           <div className="pb-6 mb-6 border-b border-neutral-100">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[#E4753F]">
@@ -87,8 +87,30 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 p-6 sm:p-10 overflow-y-auto">
+      {/* Mobile Top Navigation Bar */}
+      <div className="md:hidden w-full bg-white border-b border-neutral-200/80 p-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 ${
+                isActive
+                  ? 'bg-[#24422E] text-white'
+                  : 'text-neutral-600 bg-neutral-100'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{item.name}</span>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Main Content Area - naturally flexed next to sidebar, never overlapping */}
+      <main className="flex-1 min-w-0 p-6 sm:p-10 w-full">
         <div className="max-w-6xl mx-auto">{children}</div>
       </main>
     </div>

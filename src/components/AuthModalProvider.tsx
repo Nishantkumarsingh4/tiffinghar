@@ -74,6 +74,17 @@ export default function AuthModalProvider({ children }: { children: React.ReactN
     refreshUser();
   }, [refreshUser]);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isModalOpen]);
+
   // Auto-open modal if URL contains authRequired=true
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -245,7 +256,7 @@ export default function AuthModalProvider({ children }: { children: React.ReactN
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
           <div
-            className="relative w-full max-w-lg bg-[#FAF7F2] rounded-3xl p-5 sm:p-7 shadow-2xl border border-white/80 my-auto max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3.5rem)] overflow-y-auto"
+            className="relative w-full max-w-lg bg-[#FAF7F2] rounded-3xl p-5 sm:p-7 shadow-2xl border border-white/80 my-auto max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3.5rem)] overflow-y-auto no-scrollbar"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Close Button */}

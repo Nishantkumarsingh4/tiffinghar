@@ -50,7 +50,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       images = images.slice(0, appConfig.freeImageLimit);
     }
 
-    // 3. Fetch products
+    // 3. Fetch products with all attached images
     const products = await query<any>(
       `SELECT p.*,
         (SELECT image_url FROM product_images WHERE product_id = p.id AND is_cover = true LIMIT 1) as cover_image
@@ -59,6 +59,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
        ORDER BY p.id ASC`,
       [partnerId]
     );
+
+    const productImages = await query<any>(
+      `SELECT id, product_id, image_url, is_cover, sort_order
+       FROM product_images
+       WHERE partner_id = ? AND product_id IS NOT NULL
+       ORDER BY is_cover DESC, sort_order ASC, id ASC`,
+      [partnerId]
+    );
+
+    const productsWithImages = products.map((p) => {
+      const pImgs = productImages.filter((img) => img.product_id === p.id);
+      return {
+        ...p,
+        images: pImgs.length > 0 ? pImgs : (p.cover_image ? [{ id: 0, product_id: p.id, image_url: p.cover_image, is_cover: true, sort_order: 0 }] : []),
+      };
+    });
 
     // 4. Fetch reviews & summary
     const reviews = await query<any>(
@@ -111,7 +127,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         totalReviews: reviewStats?.total_reviews || 0,
         isFavorite,
         images,
-        products,
+        products: productsWithImages,
         reviews,
       },
     });

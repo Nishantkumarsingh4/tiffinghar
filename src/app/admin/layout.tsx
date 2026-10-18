@@ -36,9 +36,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] flex flex-col md:flex-row">
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-white border-r border-neutral-200/80 p-6 flex flex-col justify-between shrink-0">
+    <div className="min-h-[calc(100vh-5rem)] bg-[#FAF7F2] flex flex-col md:flex-row items-start relative">
+      {/* Desktop Sidebar - Sticky & Contained (Stops before Footer) */}
+      <aside className="hidden md:flex w-64 bg-white border-r border-neutral-200/80 p-6 flex-col justify-between shrink-0 sticky top-20 h-[calc(100vh-5rem)] self-start overflow-y-auto no-scrollbar z-20">
         <div>
           <div className="pb-6 mb-6 border-b border-neutral-100">
             <div className="flex items-center gap-2">
@@ -97,8 +97,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 sm:p-10 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">{children}</div>
+      <main className="flex-1 min-w-0 p-6 sm:p-10 w-full">
+        <div className="max-w-7xl mx-auto">{children}</div>
       </main>
     </div>
   );
