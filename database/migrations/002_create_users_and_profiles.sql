@@ -1,0 +1,71 @@
+-- 002_create_users_and_profiles.sql
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `human_id` VARCHAR(30) NOT NULL UNIQUE,
+  `role` ENUM('CUSTOMER', 'PARTNER', 'ADMIN') NOT NULL,
+  `email` VARCHAR(191) NOT NULL UNIQUE,
+  `phone` VARCHAR(30) NULL,
+  `password_hash` VARCHAR(255) NOT NULL,
+  `status` ENUM('ACTIVE', 'SUSPENDED', 'LOCKED') NOT NULL DEFAULT 'ACTIVE',
+  `failed_login_count` INT NOT NULL DEFAULT 0,
+  `locked_until` DATETIME NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_users_role` (`role`),
+  INDEX `idx_users_email` (`email`),
+  INDEX `idx_users_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `customer_profiles` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL UNIQUE,
+  `human_id` VARCHAR(30) NOT NULL UNIQUE,
+  `full_name` VARCHAR(150) NOT NULL,
+  `avatar_url` VARCHAR(500) NULL,
+  `phone` VARCHAR(30) NULL,
+  `address` TEXT NULL,
+  `city` VARCHAR(100) NULL,
+  `area` VARCHAR(100) NULL,
+  `pincode` VARCHAR(20) NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  INDEX `idx_cust_city` (`city`),
+  INDEX `idx_cust_area` (`area`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `partner_profiles` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL UNIQUE,
+  `human_id` VARCHAR(30) NOT NULL UNIQUE,
+  `kitchen_name` VARCHAR(191) NOT NULL,
+  `owner_name` VARCHAR(150) NOT NULL,
+  `bio` TEXT NULL,
+  `logo_url` VARCHAR(500) NULL,
+  `cover_url` VARCHAR(500) NULL,
+  `address` TEXT NULL,
+  `city` VARCHAR(100) NOT NULL,
+  `area` VARCHAR(100) NOT NULL,
+  `pincode` VARCHAR(20) NULL,
+  `lat` DECIMAL(10, 8) NULL,
+  `lng` DECIMAL(11, 8) NULL,
+  `contact_phone` VARCHAR(30) NOT NULL,
+  `contact_whatsapp` VARCHAR(30) NULL,
+  `fssai_number` VARCHAR(100) NULL,
+  `admin_rank` INT NOT NULL DEFAULT 0,
+  `is_pinned` BOOLEAN NOT NULL DEFAULT FALSE,
+  `is_verified` BOOLEAN NOT NULL DEFAULT FALSE,
+  `is_suspended` BOOLEAN NOT NULL DEFAULT FALSE,
+  `delivery_areas` TEXT NULL,
+  `delivery_timings` VARCHAR(255) NULL,
+  `plan_type` VARCHAR(100) DEFAULT 'Daily & Monthly',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  INDEX `idx_partner_city_area` (`city`, `area`),
+  INDEX `idx_partner_admin_rank` (`admin_rank`),
+  INDEX `idx_partner_is_pinned` (`is_pinned`),
+  INDEX `idx_partner_is_verified` (`is_verified`),
+  INDEX `idx_partner_is_suspended` (`is_suspended`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,0 +1,45 @@
+{
+  "name": "tiffin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:create": "npx tsx scripts/db-create.ts",
+    "db:migrate": "npx tsx scripts/db-migrate.ts",
+    "db:seed": "npx tsx scripts/db-seed.ts",
+    "db:reset": "npx tsx scripts/db-reset.ts",
+    "db:setup": "npx tsx scripts/db-setup.ts"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "dotenv": "^18.0.8",
+    "jose": "^6.2.12",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^1.59.0",
+    "mysql2": "^3.24.6",
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  }
+}
